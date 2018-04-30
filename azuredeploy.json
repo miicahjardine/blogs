@@ -22,6 +22,7 @@
         },
         "windowsAdminPassword": {
            "type": "string",
+           "defaultValue": "123VerySecurePassword123",
            "metadata": {
                 "description": "The password for the windows server"
             }
