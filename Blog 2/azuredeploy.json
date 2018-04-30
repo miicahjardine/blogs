@@ -11,7 +11,7 @@
             }
         },
         "bastionPublicKey": {
-            "type": "string",
+            "type": "securestring",
             "defaultValue": "ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAQEAn3hmW2g/7WLlGDHAh+DMCmf3SDEBRtf+0qEE2dWUlCAwwJiBCNK3nXYPfBxjsXSumai3TowGbGUwgm4Bfs7W2sqaYNVt71Mb/tlZVa7rodufEd45/rPhIBbjgsTcWmP+PjWeLOr3NizT7z2K55a8utqZGlaxsGMx34yUjnt39pJ6G8EycgR03Bm+RJS2Beq6xN1gKyGjemp4Y1t8n4NjuETAovrJ2CqVuwL0Tiqaq3+Rypcz67TZe7QdXfvi9A9RQWBfA2ZwVDdA98mkbNtbqR5IPludRVBziM2Ag1iP6aGIc86ZlTrqfvrSwCTJEPOkJmKTHriIg3BdObfcEOFmFQ== rsa-key-20180430",
             "metadata": {
                 "description": "the public key starting with rsa"
@@ -26,6 +26,7 @@
         },
         "windowsAdminPassword": {
            "type": "string",
+           "defaultValue": "123VerySecurePassword123",
            "metadata": {
                 "description": "The password for the windows server"
             }
