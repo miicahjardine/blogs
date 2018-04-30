@@ -11,21 +11,21 @@
             }
         },
         "bastionPublicKey": {
-            "type": "securestring",
+            "type": "string",
             "defaultValue": "ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAQEAn3hmW2g/7WLlGDHAh+DMCmf3SDEBRtf+0qEE2dWUlCAwwJiBCNK3nXYPfBxjsXSumai3TowGbGUwgm4Bfs7W2sqaYNVt71Mb/tlZVa7rodufEd45/rPhIBbjgsTcWmP+PjWeLOr3NizT7z2K55a8utqZGlaxsGMx34yUjnt39pJ6G8EycgR03Bm+RJS2Beq6xN1gKyGjemp4Y1t8n4NjuETAovrJ2CqVuwL0Tiqaq3+Rypcz67TZe7QdXfvi9A9RQWBfA2ZwVDdA98mkbNtbqR5IPludRVBziM2Ag1iP6aGIc86ZlTrqfvrSwCTJEPOkJmKTHriIg3BdObfcEOFmFQ== rsa-key-20180430",
             "metadata": {
                 "description": "the public key starting with rsa"
             }
         },
         "centosPublicKey": {
-            "type": "securestring",
+            "type": "string",
             "defaultValue": "ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAQEAuVBksOBMTUmHAkOlZ2TJHaSQ4UyamZXuJ+9zIZMj3amyFMUp0cX0zfKqC/n1+N85zxPWJsBHvyp+5ulh+XsFvEQiLnQjakeQOigksZKEnpSmR0qPNhmqH0QBcroQm8bz666/+yt6io7tfQLCZRQN8OfsU7uZSyYAcGb6YoDSD0xjO/jgfgSrT3yxI/yWFpRh0Vej+1LGXnC43CTAYNB65P96WMf9Q4frMzRGb1UcEdQk+G44ZeQpVLwYeBYzqBrJ8NNYzOo/FzgAnMTtP2bBKhk9CBHpolxflmhxuvLdOtl6Pw/84gLdikkPB9ZsZlyUG9Hv2RbNynI/b/Xh6unx9w== rsa-key-20180430",
             "metadata": {
                 "description": "the public key starting with rsa"
             }
         },
         "windowsAdminPassword": {
-           "type": "securestring",
+           "type": "string",
            "defaultValue": "123VerySecurePassword123",
            "metadata": {
                 "description": "The password for the windows server"
@@ -47,7 +47,6 @@
         "NSG_DMZ_Name": "[concat(variables('POC'),'-NSG-','DMZ','-',variables('environment'),'-',variables('locationShort'))]",
         "NSG_Inside_1_Name": "[concat(variables('POC'),'-NSG-','centos','-',variables('environment'),'-',variables('locationShort'))]",
         "NSG_Inside_2_Name": "[concat(variables('POC'),'-NSG-','windows','-',variables('environment'),'-',variables('locationShort'))]",
-        "dataStorageName": "[tolower(concat(variables('POC'), 'data', variables('environment'),uniqueString(subscription().id)))]",
         "VNET_AddressSpace": "10.0.0.0/16",
         "subnet_DMZ_AddressSpace": "10.0.0.0/29",
         "subnet_Inside_1_Name_AddressSpace": "10.0.0.32/27",
@@ -71,23 +70,6 @@
 
     },
     "resources": [
-        {
-            "name": "[variables('dataStorageName')]",
-            "type": "Microsoft.Storage/storageAccounts",
-            "location": "[variables('location')]",
-            "apiVersion": "2016-01-01",
-            "tags": {
-                "displayName": "dataStorage",
-                "POC": "[variables('POC')]",
-                "RG": "[resourceGroup().name]",
-                "Environment": "[variables('environment')]",
-                "Owner": "[parameters('owner')]"
-            },
-            "sku": {
-                "name": "Standard_LRS"
-            },
-            "kind": "Storage"
-        },
         {
             "comments": "Virtual Network",
             "type": "Microsoft.Network/virtualNetworks",
