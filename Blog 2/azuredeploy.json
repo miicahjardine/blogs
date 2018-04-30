@@ -18,14 +18,14 @@
             }
         },
         "centosPublicKey": {
-            "type": "string",
+            "type": "securestring",
             "defaultValue": "ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAQEAuVBksOBMTUmHAkOlZ2TJHaSQ4UyamZXuJ+9zIZMj3amyFMUp0cX0zfKqC/n1+N85zxPWJsBHvyp+5ulh+XsFvEQiLnQjakeQOigksZKEnpSmR0qPNhmqH0QBcroQm8bz666/+yt6io7tfQLCZRQN8OfsU7uZSyYAcGb6YoDSD0xjO/jgfgSrT3yxI/yWFpRh0Vej+1LGXnC43CTAYNB65P96WMf9Q4frMzRGb1UcEdQk+G44ZeQpVLwYeBYzqBrJ8NNYzOo/FzgAnMTtP2bBKhk9CBHpolxflmhxuvLdOtl6Pw/84gLdikkPB9ZsZlyUG9Hv2RbNynI/b/Xh6unx9w== rsa-key-20180430",
             "metadata": {
                 "description": "the public key starting with rsa"
             }
         },
         "windowsAdminPassword": {
-           "type": "string",
+           "type": "securestring",
            "defaultValue": "123VerySecurePassword123",
            "metadata": {
                 "description": "The password for the windows server"
