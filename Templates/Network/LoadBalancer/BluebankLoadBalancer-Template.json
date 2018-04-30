@@ -1,0 +1,133 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "POC": {
+            "type": "string",
+            "maxLength": 4,
+            "metadata": {
+                "description": "The name of the POC or Proof of Concept"
+            }
+        },
+        "location": {
+            "type": "string",
+            "allowedValues": [
+                "UKWest",
+                "UKSouth"
+            ],
+            "metadata": {
+                "description": "Location that the resources will be deployed to"
+            }
+        },
+        "environment": {
+            "type": "string",
+            "allowedValues": [
+                "Prod",
+                "DEV",
+                "TST",
+                "PPE"
+            ],
+            "metadata": {
+                "description": "Environment name"
+            }
+        },
+        "owner": {
+            "type": "string",
+            "metadata": {
+                "description": "The owner / developer of the resource"
+            }
+        },
+        "ipAllocationMethod": {
+            "type": "string",
+            "allowedValues": [
+                "Dynamic",
+                "Static"
+            ],
+            "defaultValue": "Static",
+            "metadata": {
+                "description": "The IP allocation (Dynamic/Static)"
+            }
+        },
+        "pipLabel": {
+            "type": "string",
+            "metadata": {
+                "description": "The DNS label for the pip, must be unique"
+            }
+        }
+    },
+    "variables": {
+        "locationShort": "[substring(parameters('location'),0,3)]",
+        "publicIpAddressName": "[concat(parameters('POC'), '-LB-PIP-', parameters('environment'), '-', variables('locationShort'))]",
+        "loadBalancerName": "[concat(parameters('POC'), '-LB-', parameters('environment'), '-', variables('locationShort'))]",
+        "pipLabel": "[tolower(concat(parameters('pipLabel'),uniqueString(resourceGroup().id)))]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Network/publicIPAddresses",
+            "name": "[variables('publicIpAddressName')]",
+            "apiVersion": "2017-06-01",
+            "location": "[parameters('location')]",
+            "tags": {
+                "Subscription": "[Subscription().displayName]",
+                "POC": "[parameters('POC')]",
+                "RG": "[resourceGroup().name]",
+                "Environment": "[parameters('environment')]",
+                "Owner": "[parameters('owner')]"
+            },
+            "properties": {
+                "publicIPAllocationMethod": "[parameters('ipAllocationMethod')]",
+                "dnsSettings": {
+                    "domainNameLabel": "[variables('pipLabel')]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/loadBalancers",
+            "name": "[variables('loadBalancerName')]",
+            "location": "[parameters('location')]",
+            "apiVersion": "2017-06-01",
+            "tags": {
+                "Subscription": "[Subscription().displayName]",
+                "POC": "[parameters('POC')]",
+                "RG": "[resourceGroup().name]",
+                "Environment": "[parameters('environment')]",
+                "Owner": "[parameters('owner')]"
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIpAddressName'))]"
+            ],
+            "properties": {
+                "frontendIPConfigurations": [
+                    {
+                        "name": "LoadBalancerFrontEnd",
+                        "properties": {
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIpAddresses', variables('publicIpAddressName'))]"
+                            }
+                        }
+                    }
+                ],
+                "backendAddressPools": [
+                    {
+                        "name": "bepool"
+                    }
+                ],
+                "inboundNatPools": [
+                    {
+                        "name": "natpool",
+                        "properties": {
+                            "frontendIPConfiguration": {
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/frontendIPConfigurations/loadBalancerFrontEnd')]"
+                            },
+                            "protocol": "tcp",
+                            "frontendPortRangeStart": "50000",
+                            "frontendPortRangeEnd": "50119",
+                            "backendPort": "22"
+                        }
+                    }
+                ]
+            }
+        }
+    ],
+    "outputs": {}
+}

@@ -1,0 +1,78 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "POC": {
+            "value": "POC"
+        },
+        "location": {
+            "value": "UKWest"
+        },
+        "environment": {
+            "value": "TST"
+        },
+        "owner": {
+            "value": ""
+        },
+        "ssName": {
+            "value": "scaler"
+        },
+        "vmName": {
+            "value": "scaleVm"
+        },
+        "adminUserName": {
+            "value": ""
+        },
+        "adminPublicKey": {
+            "value": ""
+        },
+        "virtualMachineSize": {
+            "value": ""
+        },
+        "instanceCount": {
+            "value": "2"
+        },
+        "osVersion": {
+            "value": "7.2"
+        },
+        "singlePlacementGroup": {
+            "value": "True"
+        },
+        "autoscaleDefault": {
+            "value": "1"
+        },
+        "autoscaleMax": {
+            "value": "5"
+        },
+        "autoscaleMin": {
+            "value": "1"
+        },
+        "scaleInCPUPercentageThreshold": {
+            "value": "65"
+        },
+        "scaleOutCPUPercentageThreshold": {
+            "value": "80"
+        },
+        "scaleOutMemPercentageThreshold": {
+            "value": "80"
+        },
+        "scaleInMemPercentageThreshold": {
+            "value": "65"
+        },
+        "scaleOutInterval": {
+            "value": "10"
+        },
+        "scaleInInterval": {
+            "value": "10"
+        },
+        "virtualNetworkName": {
+            "value": "Network"
+        },
+        "vmSubnetName": {
+            "value": "Inside1"
+        },
+        "diagStorageName": {
+            "value": "diag"
+        }
+    }
+}

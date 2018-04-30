@@ -1,0 +1,356 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "POC": {
+            "type": "string",
+            "maxLength": 4,
+            "metadata": {
+                "description": "The name of the POC or Proof of Concept"
+            }
+        },
+        "location": {
+            "type": "string",
+            "allowedValues": [
+                "UKWest",
+                "UKSouth"
+            ],
+            "metadata": {
+                "description": "Location that the resources will be deployed to"
+            }
+        },
+        "environment": {
+            "type": "string",
+            "allowedValues": [
+                "Prod",
+                "DEV",
+                "TST",
+                "PPE",
+                "DT"
+            ],
+            "metadata": {
+                "description": "Environment name"
+            }
+        },
+        "owner": {
+            "type": "string",
+            "metadata": {
+                "description": "The owner / developer of the resource"
+            }
+        },
+        "vmName": {
+            "type": "string",
+            "metadata": {
+                "description": "The name for the virtual machine"
+            }
+        },
+        "sku": {
+            "type": "string",
+            "defaultValue": "2016-Datacenter-smalldisk",
+            "allowedValues": [
+                "2012-Datacenter",
+                "2012-Datacenter-smalldisk",
+                "2016-Datacenter-smalldisk",
+                "2016-Datacenter",
+                "2016-Datacenter-Server-Core",
+                "2016-Datacenter-Server-Core-smalldisk",
+                "2016-Datacenter-smalldisk ",
+                "2016-Datacenter-with-Containers",
+                "2016-Nano-Server"
+            ],
+            "metadata": {
+                "description": ""
+            }
+        },
+        "adminUserName": {
+            "type": "string",
+            "metadata": {
+                "description": "Username for administrative user"
+            }
+        },
+        "adminPassword": {
+            "type": "string",
+            "metadata": {
+                "description": "the public key starting with rsa"
+            }
+        },
+        "virtualMachineSize": {
+            "type": "string",
+            "allowedValues": [
+                "Standard_B1ms",
+                "Standard_B1s",
+                "Standard_B2ms",
+                "Standard_B2s",
+                "Standard_B4ms",
+                "Standard_B8ms",
+                "Standard_DS2_v2_Promo",
+                "Standard_DS3_v2_Promo",
+                "Standard_DS4_v2_Promo",
+                "Standard_DS5_v2_Promo",
+                "Standard_DS11_v2_Promo",
+                "Standard_DS12_v2_Promo"
+            ],
+            "metadata": {
+                "description": "Virtual Machine SKU "
+            }
+        },
+        "publicIpAddressType": {
+            "type": "string",
+            "allowedValues": [
+                "Dynamic",
+                "Static"
+            ],
+            "metadata": {
+                "description": "Defines if IP address is public or static"
+            }
+        },
+        "virtualNetworkName": {
+            "type": "string",
+            "allowedValues": [
+                "Network"
+            ],
+            "metadata": {
+                "description": "The basic name of the virtual network this machine will be connected to"
+            }
+        },
+        "vmSubnetName": {
+            "type": "string",
+            "allowedValues": [
+                "Outside",
+                "DMZ",
+                "DataScience",
+                "Infrastructure",
+                "Inside1",
+                "Inside2",
+                "Inside3"
+            ],
+            "metadata": {
+                "description": "The name of the subnet this machine will be connected to"
+            }
+        },
+        "diagStorageName": {
+            "type": "string",
+            "defaultValue": "diag",
+            "allowedValues": [
+                "diag"
+            ],
+            "metadata": {
+                "description": "Name of Diagnostic Stoage account for keeping diagonistic logs."
+            }
+        },
+        "aadClientID": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "Client ID of AAD app which has permissions to KeyVault"
+            }
+        },
+        "aadClientSecret": {
+            "type": "securestring",
+            "defaultValue": "",
+            "metadata": {
+                "description": "Client Secret of AAD app which has permissions to KeyVault"
+            }
+        },
+        "keyVaultName": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "Name of the KeyVault to place the volume encryption key"
+            }
+        },
+        "keyVaultResourceGroup": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "Resource group of the KeyVault"
+            }
+        },
+        "useExistingKek": {
+            "type": "string",
+            "defaultValue": "nokek",
+            "allowedValues": [
+                "nokek",
+                "kek"
+            ],
+            "metadata": {
+                "description": "Select kek if the secret should be encrypted with a key encryption key and pass explicit keyEncryptionKeyURL. For nokek, you can keep keyEncryptionKeyURL empty."
+            }
+        },
+        "keyEncryptionKeyURL": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "URL of the KeyEncryptionKey used to encrypt the volume encryption key"
+            }
+        },
+        "volumeType": {
+            "type": "string",
+            "defaultValue": "All",
+            "allowedValues": [
+                "All",
+                "OS",
+                "Data"
+            ],
+            "metadata": {
+                "description": "Type of the volume OS or Data to perform encryption operation"
+            }
+        },
+        "sequenceVersion": {
+            "type": "string",
+            "defaultValue": "1.0",
+            "metadata": {
+                "description": "Pass in an unique value like a GUID everytime the operation needs to be force run"
+            }
+        }
+    },
+    "variables": {
+        "locationShort": "[substring(parameters('location'),0,3)]",
+        "vmName": "[concat(parameters('POC'), '-VM-', parameters('vmName'),'-', parameters('environment'), '-', variables('locationShort'))]",
+        "networkInterfaceName": "[concat(parameters('POC'), '-NIC-', parameters('vmName'),'-', parameters('environment'), '-', variables('locationShort'))]",
+        "publicIpAddressName": "[concat(parameters('POC'), '-PIP-', parameters('vmName'),'-', parameters('environment'), '-', variables('locationShort'))]",
+        "vnetRg": "[concat('RG-',parameters('POC'),'-Network-',parameters('environment'),'-',variables('locationShort'))]",
+        "vnetName": "[concat(parameters('POC'),'-VNET-',parameters('virtualNetworkName'),'-',parameters('environment'),'-',variables('locationShort'))]",
+        "vmSubnetName": "[concat(parameters('POC'),'-VNET-Sub-',parameters('vmSubnetName'),'-',parameters('environment'),'-',variables('locationShort'))]",
+        "vnetId": "[resourceId(variables('vnetRg'),'Microsoft.Network/virtualNetworks',variables('vnetname'))]",
+        "subnetRef": "[concat(variables('vnetId'), '/subnets/', variables('vmSubnetName'))]",
+        "diagStorageRgName": "[concat('RG-',parameters('POC'),'-DiagnosticStorage-',parameters('environment'),'-',variables('locationShort'))]",
+        "diagStorageName": "[tolower(concat(parameters('POC'),parameters('diagStorageName'), parameters('environment'),uniqueString(subscription().id)))]",
+        "diagnosticsStorageAccountId": "[concat(subscription().id,'/resourceGroups/',variables('diagStorageRgName'),'/providers/Microsoft.Storage/storageAccounts/',variables('diagStorageName'))]",
+        "metricsresourceid": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/', 'Microsoft.Compute/virtualMachines/', variables('vmName'))]",
+        "metricsclosing": "[concat('<Metrics resourceId=\"', variables('metricsresourceid'), '\"><MetricAggregation scheduledTransferPeriod=\"PT1H\"/><MetricAggregation scheduledTransferPeriod=\"PT1M\"/></Metrics></DiagnosticMonitorConfiguration></WadCfg>')]",
+        "metricscounters": "<PerformanceCounters scheduledTransferPeriod=\"PT1M\"><PerformanceCounterConfiguration counterSpecifier=\"\\Memory\\AvailableMemory\" sampleRate=\"PT15S\" unit=\"Bytes\"><annotation displayName=\"Memory available\" locale=\"en-us\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\Memory\\PercentAvailableMemory\" sampleRate=\"PT15S\" unit=\"Percent\"><annotation displayName=\"Mem. percent available\" locale=\"en-us\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\Memory\\UsedMemory\" sampleRate=\"PT15S\" unit=\"Bytes\"><annotation displayName=\"Memory used\" locale=\"en-us\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\Memory\\PercentUsedMemory\" sampleRate=\"PT15S\" unit=\"Percent\"><annotation displayName=\"Memory percentage\" locale=\"en-us\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\Memory\\PercentUsedByCache\" sampleRate=\"PT15S\" unit=\"Percent\"><annotation displayName=\"Mem. used by cache\" locale=\"en-us\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\Memory\\PagesPerSec\" sampleRate=\"PT15S\" unit=\"CountPerSecond\"><annotation displayName=\"Pages\" locale=\"en-us\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\Memory\\PagesReadPerSec\" sampleRate=\"PT15S\" unit=\"CountPerSecond\"><annotation displayName=\"Page reads\" locale=\"en-us\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\Memory\\PagesWrittenPerSec\" sampleRate=\"PT15S\" unit=\"CountPerSecond\"><annotation displayName=\"Page writes\" locale=\"en-us\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\Memory\\AvailableSwap\" sampleRate=\"PT15S\" unit=\"Bytes\"><annotation displayName=\"Swap available\" locale=\"en-us\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\Memory\\PercentAvailableSwap\" sampleRate=\"PT15S\" unit=\"Percent\"><annotation displayName=\"Swap percent available\" locale=\"en-us\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\Memory\\UsedSwap\" sampleRate=\"PT15S\" unit=\"Bytes\"><annotation displayName=\"Swap used\" locale=\"en-us\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\Memory\\PercentUsedSwap\" sampleRate=\"PT15S\" unit=\"Percent\"><annotation displayName=\"Swap percent used\" locale=\"en-us\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\Processor\\PercentIdleTime\" sampleRate=\"PT15S\" unit=\"Percent\"><annotation displayName=\"CPU idle time\" locale=\"en-us\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\Processor\\PercentUserTime\" sampleRate=\"PT15S\" unit=\"Percent\"><annotation displayName=\"CPU user time\" locale=\"en-us\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\Processor\\PercentNiceTime\" sampleRate=\"PT15S\" unit=\"Percent\"><annotation displayName=\"CPU nice time\" locale=\"en-us\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\Processor\\PercentPrivilegedTime\" sampleRate=\"PT15S\" unit=\"Percent\"><annotation displayName=\"CPU privileged time\" locale=\"en-us\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\Processor\\PercentInterruptTime\" sampleRate=\"PT15S\" unit=\"Percent\"><annotation displayName=\"CPU interrupt time\" locale=\"en-us\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\Processor\\PercentDPCTime\" sampleRate=\"PT15S\" unit=\"Percent\"><annotation displayName=\"CPU DPC time\" locale=\"en-us\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\Processor\\PercentProcessorTime\" sampleRate=\"PT15S\" unit=\"Percent\"><annotation displayName=\"CPU percentage guest OS\" locale=\"en-us\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\Processor\\PercentIOWaitTime\" sampleRate=\"PT15S\" unit=\"Percent\"><annotation displayName=\"CPU IO wait time\" locale=\"en-us\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\PhysicalDisk\\BytesPerSecond\" sampleRate=\"PT15S\" unit=\"BytesPerSecond\"><annotation displayName=\"Disk total bytes\" locale=\"en-us\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\PhysicalDisk\\ReadBytesPerSecond\" sampleRate=\"PT15S\" unit=\"BytesPerSecond\"><annotation displayName=\"Disk read guest OS\" locale=\"en-us\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\PhysicalDisk\\WriteBytesPerSecond\" sampleRate=\"PT15S\" unit=\"BytesPerSecond\"><annotation displayName=\"Disk write guest OS\" locale=\"en-us\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\PhysicalDisk\\TransfersPerSecond\" sampleRate=\"PT15S\" unit=\"CountPerSecond\"><annotation displayName=\"Disk transfers\" locale=\"en-us\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\PhysicalDisk\\ReadsPerSecond\" sampleRate=\"PT15S\" unit=\"CountPerSecond\"><annotation displayName=\"Disk reads\" locale=\"en-us\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\PhysicalDisk\\WritesPerSecond\" sampleRate=\"PT15S\" unit=\"CountPerSecond\"><annotation displayName=\"Disk writes\" locale=\"en-us\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\PhysicalDisk\\AverageReadTime\" sampleRate=\"PT15S\" unit=\"Seconds\"><annotation displayName=\"Disk read time\" locale=\"en-us\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\PhysicalDisk\\AverageWriteTime\" sampleRate=\"PT15S\" unit=\"Seconds\"><annotation displayName=\"Disk write time\" locale=\"en-us\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\PhysicalDisk\\AverageTransferTime\" sampleRate=\"PT15S\" unit=\"Seconds\"><annotation displayName=\"Disk transfer time\" locale=\"en-us\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\PhysicalDisk\\AverageDiskQueueLength\" sampleRate=\"PT15S\" unit=\"Count\"><annotation displayName=\"Disk queue length\" locale=\"en-us\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\NetworkInterface\\BytesTransmitted\" sampleRate=\"PT15S\" unit=\"Bytes\"><annotation displayName=\"Network out guest OS\" locale=\"en-us\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\NetworkInterface\\BytesReceived\" sampleRate=\"PT15S\" unit=\"Bytes\"><annotation displayName=\"Network in guest OS\" locale=\"en-us\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\NetworkInterface\\PacketsTransmitted\" sampleRate=\"PT15S\" unit=\"Count\"><annotation displayName=\"Packets sent\" locale=\"en-us\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\NetworkInterface\\PacketsReceived\" sampleRate=\"PT15S\" unit=\"Count\"><annotation displayName=\"Packets received\" locale=\"en-us\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\NetworkInterface\\BytesTotal\" sampleRate=\"PT15S\" unit=\"Bytes\"><annotation displayName=\"Network total bytes\" locale=\"en-us\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\NetworkInterface\\TotalRxErrors\" sampleRate=\"PT15S\" unit=\"Count\"><annotation displayName=\"Packets received errors\" locale=\"en-us\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\NetworkInterface\\TotalTxErrors\" sampleRate=\"PT15S\" unit=\"Count\"><annotation displayName=\"Packets sent errors\" locale=\"en-us\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\NetworkInterface\\TotalCollisions\" sampleRate=\"PT15S\" unit=\"Count\"><annotation displayName=\"Network collisions\" locale=\"en-us\"/></PerformanceCounterConfiguration></PerformanceCounters>",
+        "metricsstart": "<WadCfg><DiagnosticMonitorConfiguration overallQuotaInMB=\"4096\"><DiagnosticInfrastructureLogs scheduledTransferPeriod=\"PT1M\" scheduledTransferLogLevelFilter=\"Warning\"/>",
+        "wadcfgx": "[concat(variables('metricsstart'), variables('metricscounters'), variables('metricsclosing'))]",
+        "diagnosticsExtensionName": "Microsoft.Insights.VMDiagnosticsSettings",
+        "extensionName": "AzureDiskEncryption",
+        "extensionVersion": "1.1",
+        "encryptionOperation": "EnableEncryption",
+        "keyEncryptionAlgorithm": "RSA-OAEP",
+        "keyVaultURL": "[concat('https://', parameters('keyVaultName'), '.vault.azure.net/')]",
+        "keyVaultResourceID": "[concat(subscription().id,'/resourceGroups/',parameters('keyVaultResourceGroup'),'/providers/Microsoft.KeyVault/vaults/', parameters('keyVaultName'))]"
+    },
+    "resources": [
+        {
+            "name": "[variables('vmName')]",
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2017-03-30",
+            "dependsOn": [
+                "[concat('Microsoft.Network/networkInterfaces/',variables('networkInterfaceName'))]"
+            ],
+            "location": "[parameters('location')]",
+            "tags": {
+                "Subscription": "[Subscription().displayName]",
+                "POC": "[parameters('POC')]",
+                "RG": "[resourceGroup().name]",
+                "Environment": "[parameters('environment')]",
+                "Owner": "[parameters('owner')]"
+            },
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[parameters('virtualMachineSize')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "MicrosoftWindowsServer",
+                        "offer": "WindowsServer",
+                        "sku": "[parameters('sku')]",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "osType": "Windows",
+                        "name": "[concat(variables('vmName') ,'_OsDisk')]",
+                        "createOption": "FromImage",
+                        "caching": "ReadWrite",
+                        "managedDisk": {
+                            "storageAccountType": "Premium_LRS"
+                        }
+                    },
+                    "dataDisks": []
+                },
+                "osProfile": {
+                    "computerName": "[parameters('vmName')]",
+                    "adminUsername": "[parameters('adminUserName')]",
+                    "adminPassword": "[parameters('adminPassword')]",
+                    "windowsConfiguration": {
+                        "provisionVMAgent": true,
+                        "enableAutomaticUpdates": true
+                    },
+                    "secrets": []
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces',variables('networkInterfaceName'))]"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(variables('vmName'),'/', variables('extensionName'))]",
+            "apiVersion": "2016-04-30-preview",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines', variables('vmName'))]"
+            ],
+            "properties": {
+              "publisher": "Microsoft.Azure.Security",
+              "type": "AzureDiskEncryption",
+              "typeHandlerVersion": "[variables('extensionVersion')]",
+              "autoUpgradeMinorVersion": true,
+              "forceUpdateTag": "[parameters('sequenceVersion')]",
+              "settings": {
+                "AADClientID": "[parameters('aadClientID')]",
+                "KeyVaultURL": "[variables('keyVaultURL')]",
+                "KeyEncryptionKeyURL": "[parameters('keyEncryptionKeyURL')]",
+                "KeyEncryptionAlgorithm": "[variables('keyEncryptionAlgorithm')]",
+                "VolumeType": "[parameters('volumeType')]",
+                "EncryptionOperation": "[variables('encryptionOperation')]"
+              },
+              "protectedSettings": {
+                "AADClientSecret": "[parameters('aadClientSecret')]"
+              }
+            }
+          },
+        {
+            "name": "[variables('networkInterfaceName')]",
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2016-09-01",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/publicIpAddresses/', variables('publicIpAddressName'))]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "subnet": {
+                                "id": "[variables('subnetRef')]"
+                            },
+                            "privateIPAllocationMethod": "Dynamic",
+                            "publicIpAddress": {
+                                "id": "[resourceId(resourceGroup().name,'Microsoft.Network/publicIpAddresses', variables('publicIpAddressName'))]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "[variables('publicIpAddressName')]",
+            "type": "Microsoft.Network/publicIpAddresses",
+            "apiVersion": "2017-08-01",
+            "location": "[parameters('location')]",
+            "properties": {
+                "publicIpAllocationMethod": "[parameters('publicIpAddressType')]"
+            },
+            "sku": {
+                "name": "Basic"
+            }
+        }
+    ],
+    "outputs": {}
+}

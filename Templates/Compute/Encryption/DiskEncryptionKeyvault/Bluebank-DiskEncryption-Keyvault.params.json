@@ -1,0 +1,27 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "POC": {
+            "value": "BBT"
+        },
+        "locationShort": {
+            "value": "UKW"
+        },
+        "environment": {
+            "value": "DT"
+        },
+        "owner": {
+            "value": "Micah Jardine"
+        },
+        "vaultName": {
+            "value": "disk"
+        },
+        "dataplaneObjectId": {
+            "value": "0588ff00-1814-4b82-85ca-ff59a2fcfe4d"
+        },
+        "dataplaneTenantId": {
+            "value": "7c7175e2-48cc-4ef6-938d-e3dd722ec114"
+        }
+    }
+}

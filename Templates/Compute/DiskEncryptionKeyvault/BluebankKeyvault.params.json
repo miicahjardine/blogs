@@ -1,0 +1,33 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "POC": {
+            "value": "BBT"
+        },
+        "location": {
+            "value": "UKWest"
+        },
+        "environment": {
+            "value": "DT"
+        },
+        "owner": {
+            "value": "Micah Jardine"
+        },
+        "vaultName": {
+            "value": "bbttest"
+        },
+        "dataplaneObjectId": {
+            "value": "901553d5-75a8-4027-875f-5f5329915141"
+        },
+        "dataplaneTenantId": {
+            "value": "3559c7a5-876a-48d4-8f3e-d550483449cb"
+        },
+        "secret1name": {
+            "value": "firstSecret"
+        },
+        "secret1value": {
+            "value": "secure string"
+        }
+    }
+}
