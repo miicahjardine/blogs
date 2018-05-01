@@ -61,11 +61,11 @@
         "bastionSubnetRef": "[concat(variables('vnetId'), '/subnets/', variables('bastionVMSubnetName'))]",
         "centosName": "[concat(variables('POC'), '-VM-', 'centos','-', variables('environment'), '-', variables('locationShort'))]",
         "centosNetworkInterfaceName": "[concat(variables('POC'), '-NIC-', 'centos','-', variables('environment'), '-', variables('locationShort'))]",
-        "centosVmSubnetName": "[concat(variables('POC'),'-VNET-Sub-','DMZ','-',variables('environment'),'-',variables('locationShort'))]",
+        "centosVmSubnetName": "[concat(variables('POC'),'-VNET-Sub-','centos','-',variables('environment'),'-',variables('locationShort'))]",
         "centosSubnetRef": "[concat(variables('vnetId'), '/subnets/', variables('centosVMSubnetName'))]",
         "windowsName": "[concat(variables('POC'), '-VM-', 'windows','-', variables('environment'), '-', variables('locationShort'))]",
         "windowsNetworkInterfaceName": "[concat(variables('POC'), '-NIC-', 'windows','-', variables('environment'), '-', variables('locationShort'))]",
-        "windowsVmSubnetName": "[concat(variables('POC'),'-VNET-Sub-','DMZ','-',variables('environment'),'-',variables('locationShort'))]",
+        "windowsVmSubnetName": "[concat(variables('POC'),'-VNET-Sub-','windows','-',variables('environment'),'-',variables('locationShort'))]",
         "windowsSubnetRef": "[concat(variables('vnetId'), '/subnets/', variables('windowsVMSubnetName'))]"
 
     },
